@@ -1,192 +1,137 @@
-import os
+import axios from "axios";
+import vCardJS from "vcards-js";
 
-# Specimen class, used for the purpose of organizing the data in these files
-# Consists of a string to repesent the name of the specimen (E.g. 10a), and
-# a list of strings containing the loci information.
-class Specimen():
-	
-	# Initializes specimen object
-	def __init__(self, name):
-		self.m_name = name
-		self.m_loci_list = []
+const getBase64FromUrl = async (url) => {
+  const { data } = await axios({
+    method: "GET",
+    url,
+    responseType: "blob",
+  });
 
-	# SETTERS
-	# Sets name
-	def set_name(self, name):
-		self.m_name = name
-	# Sets loci list
-	def set_loci_list(self, loci_list):
-		self.m_loci_list = loci_list
-	# Sets loci at a specific index in the loci list
-	def set_loci_at(self, loci, index):
-		self.m_loci_list[index] = loci
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(data);
+    reader.onloadend = () => {
+      const base64data = reader.result;
+      resolve(base64data);
+    };
+  });
+};
 
-	# GETTERS
-	# Returns specimen name
-	def get_name(self):
-		return(self.m_name)
-	# Returns specimen loci list
-	def get_loci_list(self):
-		return(self.m_loci_list)
-	# Returns specimen loci at a specific index
-	def get_loci_at(self, index):
-		return(self.m_loci_list[index])	
+const generateVCF = async () => {
+  const base64Img = await getBase64FromUrl(
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2ukppM2XgArR7MtxpPVzUDeXPGA-gcBoSug&usqp=CAU"
+  );
 
-	# OTHER
-	# Adds loci to the loci list
-	def add_loci(self, loci):
-		self.m_loci_list.append(loci)
+  const b64 = base64Img.replace(/^data:image.+;base64,/, "");
 
-	# (For debugging purposes)
-	def print_data(self):
-		print("Name:", self.get_name())
-		print("Loci:")
-		for loci in self.get_loci_list():
-			print("\t", loci)
+  // Add all contacts
+  const contacts = [
+    { name: "COCAN WORLD", phone: "01028067666" },
+    { name: "JELLAVU", phone: "01064112044" },
+    { name: "IN YOURSHoE", phone: "01223686410" },
+    { name: "FRILLA", phone: "01222125998" },
+    { name: "Amira store", phone: "01007863516" },
+    { name: "Diva Diana", phone: "01001505519" },
+    { name: "Zainab", phone: "01113666375" },
+    { name: "MEHOS", phone: "01222877834" },
+    { name: "MANOLLI", phone: "01223911543" },
+    { name: "MOONLIGHT", phone: "01140027732" },
+    { name: "RANIA MATTAR", phone: "0122316700" },
+    { name: "TALEED", phone: "01005083320" },
+    { name: "NINA SHAWKI COLLECTIONS", phone: "01007119745" },
+    { name: "YALA BOUTIQUE", phone: "01063511117" },
+    { name: "GERBERA SHAYMAA ALSHAARAWY", phone: "01011161762" },
+    { name: "VOUCHER", phone: "01144857777" },
+    { name: "NOON ART", phone: "028477184" },
+    { name: "THE SELECT", phone: "01287987008" },
+    { name: "OYA", phone: "01222174445" },
+    { name: "COQUETTE", phone: "01200200819" },
+    { name: "NADA GOMAA", phone: "01007669699" },
+    { name: "CARPET LAND", phone: "000015406" },
+    { name: "DANANEER", phone: "01065828100" },
+    { name: "RABAB SHERIF", phone: "01006501494" },
+    { name: "THE CAPE", phone: "01116618982" },
+    { name: "DODO DESIGNS", phone: "01156444378" },
+    { name: "ASH DECORATION", phone: "01096811058" },
+    { name: "SILA", phone: "01140702424" },
+    { name: "MOUNIRSTEXTILE", phone: "01006767632" },
+    { name: "NORAAMIN DESIGNS", phone: "01273774377" },
+    { name: "DEL MAISON", phone: "01023422255" },
+    { name: "LAMSA MASREYA", phone: "01210040460" },
+    { name: "HAND MADE JE WELRY", phone: "0126969235" },
+    { name: "مخبوزات بيتي", phone: "01024808703" },
+    { name: "GERBERA", phone: "01155633011" },
+    { name: "MED CEUTICALS SKIN HAIR LOBS", phone: "01210857771" },
+    { name: "MINIMA", phone: "01050777505" },
+    { name: "ثياب", phone: "01001524269" },
+    { name: "ELLIEHOME", phone: "01024365484" },
+    { name: "FUFA", phone: "01149969084" },
+    { name: "ECRU", phone: "01014048347" },
+    { name: "HBSHOP.CO", phone: "01110357445" },
+    { name: "HALA EZZATE", phone: "01003999011" },
+    { name: "JOUZOOR", phone: "01013289132" },
+    { name: "K&A HOME", phone: "01024448771" },
+    { name: "MAHA THARWAT", phone: "01111211174" },
+    { name: "NK DESIGNS", phone: "01008098310" },
+    { name: "YASHMAK SCARF FOR WOMEN", phone: "0116600665" },
+    { name: "MIRMIA", phone: "01045555722" },
+    { name: "المطبخ الريفي", phone: "01019120957" },
+    { name: "نــــــــوايا", phone: "01203060666" },
+    { name: "SHAML AONLINE", phone: "01026570307" },
+    { name: "ECHARPISTA", phone: "01020183548" },
+    { name: "CUATROCUISINE", phone: "01008787185" },
+    { name: "المغفره", phone: "01126424907" },
+    { name: "AKLAHWBALAD", phone: "01017052521" },
+    { name: "JRWOMANWEAR", phone: "01110204577" },
+    { name: "مجوهرات نوفا فاروق", phone: "01095711894" },
+    { name: "ONE.ONE", phone: "01008099100" },
+    { name: "BUTTERFIY WOMENCLOTHES", phone: "01150020772" },
+    { name: "ELWARSHA ART CRAFT", phone: "01012490390" },
+    { name: "NARYA BY CEHAD HABIB", phone: "01090744976" },
+    { name: "خمس خمسات", phone: "01129102030" },
+    { name: "MIRA S HOME", phone: "01001814593" },
+    { name: "FOR WOMEN", phone: "01023270415" },
+    { name: "TREND YART", phone: "01202119660" },
+    { name: "ALL SEASONS", phone: "01221102979" },
+    { name: "BASMA OMER", phone: "01067233000" },
+    { name: "EGY ANTIQUE", phone: "01220851567" },
+    { name: "NOUR ELDEIN", phone: "01128227089" },
+    { name: "الزهروان", phone: "01097755863" },
+    { name: "ROLA 1988", phone: "01143737191" },
+    { name: "الساحر السوري للموبايل", phone: "01019255658" },
+    { name: "JOLO CATERING AND EVENTS", phone: "01080498098" },
+    { name: "MAROLRTA HAND MADE", phone: "01154700112" },
+    { name: "ELHOSARY", phone: "01050043600" },
+    { name: "SADU DESIGNS", phone: "01009458658" },
+    { name: "ALEJON", phone: "01070910200" },
+    { name: "عالموضه", phone: "01203433774" },
+    { name: "M&S", phone: "01126001082" },
+    { name: "اسطوره الخليج", phone: "01011037415" },
+    { name: "THE FIKKYS", phone: "01002850397" },
+    { name: "DELTA STATIONERY", phone: "01282227373" },
+    { name: "LABEL", phone: "01115572721" },
+    { name: "MARUSKA BOUTIQUE", phone: "01004979150" },
+  ];
 
+  contacts.forEach((contact) => {
+    const newVCard = vCardJS();
+    newVCard.firstName = contact.name;
+    newVCard.cellPhone = contact.phone;
+    newVCard.photo.embedFromString(b64, "JPEG");
 
-# Opens VCF files in the VCF folder, makes a list of the lines in the file
-# and removes the commands at the top of the file and the 9 leftmost columns
-def openVCF(VCFFileName):
+    const cardTXT = newVCard.getFormattedString();
+    const file = new Blob([cardTXT], {
+      type: "text/plain;charset=utf-8",
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(file);
+    a.download = `${contact.name}.vcf`;
+    a.click();
+  });
 
-	print("\nNow reading:", VCFFileName)
-	VCFFile = open("C:\\Users\\BurnsLab\\Desktop\\VCF Converter Tool\\VCF Files\\" + VCFFileName, "r")
-	# Creates a list of strings of file contents, line by line
-	#(Clears list when reading a new file)
-	VCFFileContents = []
-	VCFFileContents = VCFFile.readlines()
-	
-	# Removes commands/file info at the top
-	while(VCFFileContents[0].startswith("##")):
-		VCFFileContents.remove(VCFFileContents[0])
-	
-	# Splits line into columns and removes the first 9 columns in each line
-	for line in range(0, len(VCFFileContents)):
-		# Strips off "\n" at the end of each line
-		VCFFileContents[line] = VCFFileContents[line].strip()
-		# Splits list into 2-dimensional list
-		VCFFileContents[line] = VCFFileContents[line].split("\t")
-		# Slices off commands at top of file
-		VCFFileContents[line] = VCFFileContents[line][9:]
+  btn.style.backgroundColor = "white";
+};
 
-	VCFFile.close()
-	return(VCFFileContents)
+const btn = document.getElementById("btn");
 
-
-# Replaces homozygous loci with ["NA", "NA"] and heterozygous with nonzero numbers
-def analyzeLociDataList(intermediateList):
-	
-	print("Searching for heterozygotes...")
-	# Searches for elements of the list (skipping the specimen names)
-	# that do not start with "./." or "0/0"
-	for row in range(1, len(intermediateList)):
-		for column in range(0, len(intermediateList[row])):
-			if(intermediateList[row][column][0] == intermediateList[row][column][2]):
-				intermediateList[row][column] = ["NA","NA"]
-			else:
-				# Splits loci data by ":"
-				intermediateList[row][column] = intermediateList[row][column].split(":")
-				# Removes first 2 elements of the list made from splitting
-				intermediateList[row][column] = intermediateList[row][column][2]
-				# Splits remaining numbers, adds nonzero numbers to a temp list
-				intermediateList[row][column] = intermediateList[row][column].split(",")
-				nonZeroNums = []
-				for num in intermediateList[row][column]:
-					if(int(num) > 0):
-						nonZeroNums.append(num)
-				
-				# Keeps appropriate heterozygote information in list
-				if(len(nonZeroNums) < 2):
-					# Just in case pyrad fasely labels a heterozygote
-					intermediateList[row][column] = ["NA","NA"]
-				else:
-					# Sets old loci data equal to the temp list
-					intermediateList[row][column] = nonZeroNums
-				
-	return(intermediateList)
-
-
-# Restructures the information from the list returned from analyzeLociDataList
-# by making a list of specimen objects
-def createSpecimen(lociList):
-
-	print("Reorganizing heterozygote data...")
-	specimenList = []
-	
-	# Iterates through first row of the loci list (row with specimen names)
-	for column in range(0, len(lociList[0])):
-		# Creates a specimen object from name in row 0 in lociList
-		specimenList.append(Specimen(lociList[0][column]))
-	# Removes name row in lociList
-	lociList.remove(lociList[0])
-	
-	# Adds each loci to respective Specimen object
-	for lociIndex in range(0, len(lociList)):
-		for specIndex in range(0, len(specimenList)):
-			specimenList[specIndex].add_loci(lociList[lociIndex][specIndex])
-
-	# Returns list of specimen
-	return(specimenList)
-
-
-# Creates a .txt file, writes information from the specimen list to it
-# in HetAlleleDepth format
-def createTXTFile(fileName, specList):
-	
-	print("Writing data to HetAlleleDepth file")
-	# Creates a respective name from the corresponding .VCF file
-	fileName = fileName[:-4]
-	fileName = "HetAlleleDepth" + fileName + ".txt"
-	# Opens .txt file with respective name
-	TXTFile = open("C:\\Users\\BurnsLab\\Desktop\\VCF Converter Tool\\Converted Files\\" + fileName, "w")
-	
-	# Writes names at the top of txt file
-	line = ""
-	for spec in specList:
-		line += spec.get_name() + "\t" + spec.get_name() + "\t"
-	line = line.strip()
-	TXTFile.write(line + "\n")
-
-	# Writes rest of data
-	for lociIndex in range(len(specList[0].get_loci_list())):
-		line = ""
-		for spec in range(0, len(specList)):
-			line += specList[spec].get_loci_at(lociIndex)[0] + "\t"
-			line += specList[spec].get_loci_at(lociIndex)[1] + "\t"
-		line = line.strip()
-		TXTFile.write(line + "\n")
-	
-	TXTFile.close()
-
-
-
-def main():
-	
-	print("Welcome to Dan's VCF file converting tool!")
-	print("This program converts VCF files to Heterozygous Allele Depth Files.")
-	print("Before we start converting, make sure every VCF file you want to convert is in the \"VCF Files\" folder")
-	input("Hit Enter to start converting: ")
-	
-	#Creates list of files in the folder for VCF files to be converted
-	VCFFileList = os.listdir("C:\\Users\\BurnsLab\\Desktop\\VCF Converter Tool\\VCF Files")
-	print("Would you like to convert these files?\n")
-
-	for VCFFileName in VCFFileList:
-		print(VCFFileName)
-	
-	# Opens a VCF file in VCF folder, Removes unnecessary information,
-	# restructures the information, and writes information to .txt file.
-	# Repeats for each file in the folder
-	readyToConvert = input("\nType \"y\" to continue, \"n\" to quit: ")
-	if(readyToConvert == "y"):
-		for VCFFileName in VCFFileList:
-			lociDataList = openVCF(VCFFileName)
-			analyzedList = analyzeLociDataList(lociDataList)
-			specimenList = createSpecimen(analyzedList)
-			createTXTFile(VCFFileName, specimenList)
-
-	print("\n\nAll files have been converted successfully!")
-	print("Navigate to: \"C:\\Users\\BurnsLab\\Desktop\\VCF Converter Tool\\Converted Files\" to access your converted files.")
-
-main()
-input("\n\nPress enter to quit")
